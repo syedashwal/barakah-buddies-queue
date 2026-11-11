@@ -1,0 +1,18 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Barakah Buddies Uploader</title><link rel="stylesheet" href="style.css"></head><body>
+<header><img src="logo.png" alt="Barakah Buddies logo"><div><h1>Barakah Buddies Uploader</h1><nav><a href="index.html">Home</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a></nav></div></header>
+<p>Barakah Buddies is a family of YouTube channels with short, gentle Islamic-manners cartoons for children aged 2 to 6, in English, Urdu, Hindi and Tamil.</p>
+<p><b>Barakah Buddies Uploader</b> is a small internal tool used only by the channel owner. It uploads our own finished Shorts to our own four channels and sets their scheduled publish time, title, description and playlist. It does not access any other user's data, and there are no outside users.</p>
+<div class="yt"><span class="logo">▶ YouTube</span> This tool uses YouTube API Services.</div>
+<h2>Our channels</h2>
+<ul>
+<li><a href="https://www.youtube.com/@BarakahBuddiesEnglish">Barakah Buddies English</a></li>
+<li><a href="https://www.youtube.com/@BarakahBuddiesUrdu">Barakah Buddies Urdu</a></li>
+<li><a href="https://www.youtube.com/@BarakahBuddiesHindi">Barakah Buddies Hindi</a></li>
+<li><a href="https://www.youtube.com/@BarakahBuddiesTamil">Barakah Buddies Tamil</a></li>
+</ul>
+<h2>How it works</h2>
+<ol><li>Finished videos and their titles are placed in this GitHub repository.</li>
+<li>A scheduled GitHub Action signs in with the channel owner's own Google account (OAuth 2.0, scope <code>youtube.upload</code>/<code>youtube</code>).</li>
+<li>It calls <code>videos.insert</code> with a future <code>publishAt</code> time and <code>selfDeclaredMadeForKids=true</code>, then <code>playlistItems.insert</code> to add the video to the right playlist.</li></ol>
+<p>Contact: <a href="https://github.com/syedashwal/barakah-buddies-queue/issues">open an issue on GitHub</a>.</p>
+<footer><a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Service</a> · <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a> · <a href="https://policies.google.com/privacy">Google Privacy Policy</a><br>This service uses YouTube API Services.</footer></body></html>
