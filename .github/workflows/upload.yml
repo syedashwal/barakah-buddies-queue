@@ -1,0 +1,44 @@
+name: Upload scheduled Shorts
+on:
+  schedule:
+    - cron: "15 */3 * * *"   # every 3 hours
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "List what would be uploaded, upload nothing"
+        type: boolean
+        default: false
+permissions:
+  contents: write
+concurrency: uploader
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: queue
+          path: queue
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install google-api-python-client google-auth
+      - name: Upload due Shorts
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_TOKEN_EN: ${{ secrets.YT_TOKEN_EN }}
+          YT_TOKEN_UR: ${{ secrets.YT_TOKEN_UR }}
+          YT_TOKEN_HI: ${{ secrets.YT_TOKEN_HI }}
+          YT_TOKEN_TA: ${{ secrets.YT_TOKEN_TA }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+        run: python uploader/upload.py
+      - name: Save upload log
+        if: always()
+        working-directory: queue
+        run: |
+          git config user.name "barakah-uploader"
+          git config user.email "actions@users.noreply.github.com"
+          git add uploaded.json
+          git diff --cached --quiet || (git commit -m "Record uploads" && git push)
