@@ -1,5 +1,5 @@
 // Inject in a YouTube Studio tab (correct channel selected), then: bbRun(rawUrl, fileName, title, desc, dateStr|null, 'HH:MM'); poll window._res
-// dateStr null = Studio default (tomorrow); 'today' = today; else 'DD Mon YYYY' typed into the date picker input.
+// date null = Studio default (tomorrow); 'today'; or a day number in the currently shown month. bbQueue(items) runs a list, logs to window._log.
 const sl=ms=>new Promise(r=>setTimeout(r,ms));
 window.bbRun=async(url,name,title,desc,date,hhmm)=>{ window._res='running';
  try{ (document.querySelector('ytcp-button.ytcpAppHeaderCreateIcon')||document.querySelector('#create-icon')).click(); await sl(1200); document.querySelector('#text-item-0')?.click(); await sl(2500);
@@ -10,10 +10,14 @@ window.bbRun=async(url,name,title,desc,date,hhmm)=>{ window._res='running';
  const mfk=d.querySelector('tp-yt-paper-radio-button[name="VIDEO_MADE_FOR_KIDS_MFK"]'); if(mfk && mfk.getAttribute('aria-checked')!=='true') mfk.click(); await sl(500);
  d.querySelector('#step-badge-3').click(); await sl(1500); d.querySelector('#second-container-expand-button').click(); await sl(1200);
  if(date==='today'){d.querySelector('#datepicker-trigger').click(); await sl(1000); document.querySelector('span.calendar-day.today').click(); await sl(800);}
- else if(date){d.querySelector('#datepicker-trigger').click(); await sl(1000); const di=[...document.querySelectorAll('ytcp-date-picker input, tp-yt-paper-dialog input')].find(e=>e.offsetParent); di.focus(); di.select(); document.execCommand('insertText',false,date); di.dispatchEvent(new Event('input',{bubbles:true})); di.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',keyCode:13,bubbles:true})); await sl(1000);}
+ else if(date){d.querySelector('#datepicker-trigger').click(); await sl(1000); const c=[...document.querySelectorAll('span.calendar-day')].find(e=>e.offsetParent&&e.innerText.trim()===String(date)&&!/disabled/.test(e.className)); if(!c){window._res='no day '+date;return} c.click(); await sl(800);}
  const ti=d.querySelector('#time-of-day-container input'); ti.click(); await sl(900); const it=[...document.querySelectorAll('tp-yt-paper-item')].find(e=>e.innerText.trim()===hhmm); it.scrollIntoView(); await sl(300); it.click(); await sl(600);
  const when=d.querySelector('#datepicker-trigger').innerText.trim()+' '+ti.value; window._when=when;
- for(let k=0;k<4;k++){ const got=[...document.querySelectorAll('ytcp-button,button,tp-yt-paper-button')].find(e=>/^Got it$/i.test(e.innerText.trim())&&e.offsetParent); if(got){got.click(); await sl(1000);} let s=document.querySelector('ytcp-video-share-dialog'); if(s&&s.offsetParent&&/scheduled/i.test(s.innerText)) break; for(let i=0;i<60;i++){const bt=d.querySelector('#done-button'); if(bt && !bt.hasAttribute('disabled') && bt.getAttribute('aria-disabled')!=='true'){bt.click(); break} await sl(3000);} await sl(5000);}
- const s=document.querySelector('ytcp-video-share-dialog'); window._res=(s&&s.offsetParent?s.innerText.replace(/\s+/g,' ').slice(0,100):'no share')+' | '+when+' | '+((s?.innerText.match(/shorts\/([\w-]{11})/)||['',''])[1]);
+ let ok='';for(let i=0;i<120&&!ok;i++){ const got=[...document.querySelectorAll('ytcp-button,button,tp-yt-paper-button')].find(e=>/^Got it$/i.test(e.innerText.trim())&&e.offsetParent); if(got){got.click(); await sl(1000);}
+  const dl=[...document.querySelectorAll('ytcp-video-share-dialog, ytcp-dialog, tp-yt-paper-dialog, [role=dialog]')].find(e=>e.offsetParent&&!d.contains(e)&&!e.contains(d)&&/Video scheduled|set to public on/i.test(e.innerText)); if(dl){ok=dl.innerText.replace(/\s+/g,' ').slice(0,110)+' | '+((dl.innerText.match(/shorts\/([\w-]{11})/)||['',''])[1]); break}
+  const bt=d.querySelector('#done-button'); if(d.offsetParent&&bt&&!bt.hasAttribute('disabled')&&bt.getAttribute('aria-disabled')!=='true'){bt.click(); await sl(4000); continue}
+  await sl(3000);}
+ window._res=(ok||'NOT CONFIRMED')+' | '+when;
  }catch(e){window._res='ERR '+e+' when='+window._when}};
+window.bbQueue=async(items)=>{window._log=[];for(const it of items){await window.bbRun(...it);window._log.push(it[1]+' -> '+window._res);if(/^(no input|ERR|no day|bad blob|NOT CONF)/.test(window._res))break;const c=[...document.querySelectorAll('ytcp-button,tp-yt-paper-button,button')].find(e=>e.offsetParent&&/^Close$/i.test(e.innerText.trim()));c&&c.click();await sl(2500);}window._log.push('DONE');};
 'loaded';
