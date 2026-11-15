@@ -1,7 +1,7 @@
 // Inject in a YouTube Studio tab (correct channel selected), then: bbRun(rawUrl, fileName, title, desc, dateStr|null, 'HH:MM'); poll window._res
 // date null = Studio default (tomorrow); 'today'; or a day number in the currently shown month. bbQueue(items) runs a list, logs to window._log.
 const sl=ms=>new Promise(r=>setTimeout(r,ms));
-window.bbRun=async(url,name,title,desc,date,hhmm)=>{ window._res='running';
+window.bbRun=async(url,name,title,desc,date,hhmm)=>{ window._res='running'; [...document.querySelectorAll('ytcp-button,button,tp-yt-paper-button')].filter(e=>e.offsetParent&&/^Close$/i.test(e.innerText.trim())).forEach(e=>e.click()); await sl(1500);
  try{ window._res='fetching'; const b=await (await fetch(url)).blob(); if(b.size<100000){window._res='bad blob '+b.size; return} window._res='fetched '+b.size;
  (document.querySelector('ytcp-button.ytcpAppHeaderCreateIcon')||document.querySelector('#create-icon')).click(); await sl(1200); document.querySelector('#text-item-0')?.click(); await sl(2500);
  const inp=document.querySelector('ytcp-uploads-file-picker input[type=file]'); if(!inp){window._res='no input';return}
@@ -14,7 +14,7 @@ window.bbRun=async(url,name,title,desc,date,hhmm)=>{ window._res='running';
  const ti=d.querySelector('#time-of-day-container input'); ti.click(); await sl(900); const it=[...document.querySelectorAll('tp-yt-paper-item')].find(e=>e.innerText.trim()===hhmm); it.scrollIntoView(); await sl(300); it.click(); await sl(600);
  const when=d.querySelector('#datepicker-trigger').innerText.trim()+' '+ti.value; window._when=when;
  let ok='';for(let i=0;i<120&&!ok;i++){ const got=[...document.querySelectorAll('ytcp-button,button,tp-yt-paper-button')].find(e=>/^Got it$/i.test(e.innerText.trim())&&e.offsetParent); if(got){got.click(); await sl(1000);}
-  const dl=[...document.querySelectorAll('ytcp-video-share-dialog, ytcp-dialog, tp-yt-paper-dialog, [role=dialog]')].find(e=>e.offsetParent&&!d.contains(e)&&!e.contains(d)&&/Video scheduled|set to public on/i.test(e.innerText)); if(dl){ok=dl.innerText.replace(/\s+/g,' ').slice(0,110)+' | '+((dl.innerText.match(/shorts\/([\w-]{11})/)||['',''])[1]); break}
+  const dl=[...document.querySelectorAll('ytcp-video-share-dialog, ytcp-dialog, tp-yt-paper-dialog, [role=dialog]')].find(e=>e.offsetParent&&!d.contains(e)&&!e.contains(d)&&/Video scheduled|Video published|set to public on/i.test(e.innerText)&&(!/\| [\w-]{11}|shorts\//.test(e.innerText)||e.innerText.includes(title.slice(0,12)))); if(dl){ok=dl.innerText.replace(/\s+/g,' ').slice(0,110)+' | '+((dl.innerText.match(/shorts\/([\w-]{11})/)||['',''])[1]); break}
   const bt=d.querySelector('#done-button'); if(d.offsetParent&&bt&&!bt.hasAttribute('disabled')&&bt.getAttribute('aria-disabled')!=='true'){bt.click(); await sl(4000); continue}
   await sl(3000);}
  window._res=(ok||'NOT CONFIRMED')+' | '+when;
